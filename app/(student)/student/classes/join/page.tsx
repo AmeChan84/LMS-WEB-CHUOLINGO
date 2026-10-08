@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ArrowRight, KeyRound, Loader2, LogIn } from "lucide-react";
+import { ArrowLeft, ArrowRight, KeyRound, Loader2, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -61,6 +61,11 @@ export default function JoinClassPage() {
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
+      <Button asChild variant="outline" size="sm" className="back-navigation">
+        <Link href="/student/classes">
+          <ArrowLeft className="h-4 w-4" /> Về danh sách lớp
+        </Link>
+      </Button>
       <div>
         <div className="text-sm text-muted-foreground">
           <Link href="/student/dashboard" className="hover:underline">

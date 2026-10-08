@@ -80,7 +80,7 @@ export default async function StudentAssignmentPage(props: {
             <p className="text-muted-foreground text-sm">
               Giáo viên chưa xuất bản bài tập này cho học sinh. Quay lại sau nhé.
             </p>
-            <Button asChild variant="outline" className="mt-3">
+            <Button asChild variant="outline" className="back-navigation mt-3">
               <Link href="/student/dashboard">
                 <ArrowLeft className="h-4 w-4 mr-1.5" /> Về trang chủ
               </Link>
@@ -135,7 +135,7 @@ export default async function StudentAssignmentPage(props: {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center gap-2">
-        <Button asChild variant="ghost" size="sm">
+        <Button asChild variant="outline" size="sm" className="back-navigation">
           <Link href="/student/assignments">
             <ArrowLeft className="h-4 w-4 mr-1" /> Về danh sách bài tập
           </Link>

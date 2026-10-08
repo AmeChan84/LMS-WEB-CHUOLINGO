@@ -50,10 +50,10 @@ export default function AuthLayout({
 
       {/* Right: form */}
       <div className="flex min-h-screen flex-col">
-        <div className="container relative flex h-16 items-center lg:hidden">
+        <div className="container relative flex h-16 items-center">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+            className="back-navigation inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm"
           >
             <ChevronLeft className="h-4 w-4" /> Quay về
           </Link>

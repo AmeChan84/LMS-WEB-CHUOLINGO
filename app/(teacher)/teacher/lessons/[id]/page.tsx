@@ -91,7 +91,7 @@ export default async function LessonDetailPage(props: {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center gap-2">
-        <Button asChild variant="ghost" size="sm">
+        <Button asChild variant="outline" size="sm" className="back-navigation">
           <Link href="/teacher/lessons">
             <ArrowLeft className="h-4 w-4" /> Về thư viện
           </Link>

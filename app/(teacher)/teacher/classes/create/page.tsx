@@ -81,7 +81,7 @@ export default function CreateClassPage() {
             Điền thông tin lớp học — một mã tham gia duy nhất sẽ được tạo để học sinh tham gia.
           </p>
         </div>
-        <Button asChild variant="ghost">
+        <Button asChild variant="outline" className="back-navigation">
           <Link href="/teacher/classes">Quay lại</Link>
         </Button>
       </div>

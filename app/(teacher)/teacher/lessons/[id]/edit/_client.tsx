@@ -51,7 +51,7 @@ export function LessonEditClient({ lesson }: { lesson: Lesson }) {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <Button asChild variant="ghost" size="sm">
+      <Button asChild variant="outline" size="sm" className="back-navigation">
         <Link href={`/teacher/lessons/${lesson.id}`}><ArrowLeft className="mr-1.5 h-4 w-4" /> Quay lại bài học</Link>
       </Button>
       <Card>
