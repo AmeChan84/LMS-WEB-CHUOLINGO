@@ -1,0 +1,207 @@
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  TEACHER
+  STUDENT
+}
+
+enum ClassStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum AssignmentStatus {
+  DRAFT
+  PUBLISHED
+  COMPLETED
+  ARCHIVED
+}
+
+enum SubmissionStatus {
+  IN_PROGRESS
+  SUBMITTED
+  GRADED
+}
+
+model User {
+  id             String   @id @default(uuid())
+  supabaseUserId String?  @unique
+  name           String
+  email          String   @unique
+  passwordHash   String?
+  role           UserRole
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  classes          Class[]           @relation("TeacherClasses")
+  enrollments      ClassEnrollment[] @relation("StudentEnrollments")
+  lessons          Lesson[]          @relation("TeacherLessons")
+  assignments      Assignment[]      @relation("TeacherAssignments")
+  submissions      Submission[]      @relation("StudentSubmissions")
+  announcements    Announcement[]    @relation("TeacherAnnouncements")
+
+  @@map("users")
+  @@index([role])
+  @@index([email])
+}
+
+model Class {
+  id            String   @id @default(uuid())
+  teacherId     String   @map("teacher_id")
+  teacher       User     @relation("TeacherClasses", fields: [teacherId], references: [id], onDelete: Cascade)
+  name          String
+  subject       String
+  description   String?
+  level         String?
+  coverImageUrl String?  @map("cover_image_url")
+  joinCode      String   @unique @map("join_code")
+  status        ClassStatus @default(ACTIVE)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  enrollments   ClassEnrollment[]
+  lessons       Lesson[]
+  assignments   Assignment[]
+  announcements Announcement[]
+
+  @@map("classes")
+  @@index([teacherId])
+  @@index([joinCode])
+  @@index([status])
+}
+
+model ClassEnrollment {
+  id        String   @id @default(uuid())
+  classId   String   @map("class_id")
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  studentId String   @map("student_id")
+  student   User     @relation("StudentEnrollments", fields: [studentId], references: [id], onDelete: Cascade)
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  @@map("class_enrollments")
+  @@unique([classId, studentId])
+  @@index([classId])
+  @@index([studentId])
+}
+
+model Lesson {
+  id                 String       @id @default(uuid())
+  classId            String       @map("class_id")
+  class              Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacherId          String       @map("teacher_id")
+  teacher            User         @relation("TeacherLessons", fields: [teacherId], references: [id], onDelete: Cascade)
+  title              String
+  description        String?
+  lessonDate         DateTime     @map("lesson_date")
+  lessonNotes        String?      @map("lesson_notes")
+  learningObjectives Json?        @map("learning_objectives")
+  topicsCovered      String?      @map("topics_covered")
+  createdAt          DateTime     @default(now()) @map("created_at")
+  updatedAt          DateTime     @updatedAt @map("updated_at")
+
+  files       LessonFile[]
+  assignments Assignment[]
+
+  @@map("lessons")
+  @@index([classId])
+  @@index([teacherId])
+  @@index([lessonDate])
+}
+
+model LessonFile {
+  id            String   @id @default(uuid())
+  lessonId      String   @map("lesson_id")
+  lesson        Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  fileName      String   @map("file_name")
+  fileType      String   @map("file_type")
+  fileSizeBytes BigInt   @map("file_size_bytes")
+  storagePath   String   @map("storage_path")
+  storageBucket String   @map("storage_bucket")
+  isVideo       Boolean  @default(false) @map("is_video")
+  uploadedAt    DateTime @default(now()) @map("uploaded_at")
+
+  @@map("lesson_files")
+  @@index([lessonId])
+}
+
+model Assignment {
+  id                      String            @id @default(uuid())
+  classId                 String            @map("class_id")
+  class                   Class             @relation(fields: [classId], references: [id], onDelete: Cascade)
+  lessonId                String?           @map("lesson_id")
+  lesson                  Lesson?           @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+  teacherId               String            @map("teacher_id")
+  teacher                 User              @relation("TeacherAssignments", fields: [teacherId], references: [id], onDelete: Cascade)
+  title                   String
+  instructions            String?
+  questionsJson           Json              @map("questions_json")
+  answerKeyJson           Json?             @map("answer_key_json")
+  totalPoints             Int               @default(0) @map("total_points")
+  dueDate                 DateTime?         @map("due_date")
+  status                  AssignmentStatus  @default(DRAFT)
+  showFeedbackImmediately Boolean           @default(true) @map("show_feedback_immediately")
+  difficulty              String?
+  estimatedMinutes        Int?              @map("estimated_minutes")
+  createdAt               DateTime          @default(now()) @map("created_at")
+  updatedAt               DateTime          @updatedAt @map("updated_at")
+
+  submissions Submission[]
+
+  @@map("assignments")
+  @@index([classId])
+  @@index([lessonId])
+  @@index([teacherId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model Submission {
+  id                String           @id @default(uuid())
+  assignmentId      String           @map("assignment_id")
+  assignment        Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  studentId         String           @map("student_id")
+  student           User             @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
+  answersJson       Json             @map("answers_json")
+  score             Decimal?         @db.Decimal(6, 2)
+  maxScore          Decimal?         @db.Decimal(6, 2) @map("max_score")
+  aiSuggestedScore  Decimal?         @db.Decimal(6, 2) @map("ai_suggested_score")
+  autoGradeScore    Decimal?         @db.Decimal(6, 2) @map("auto_grade_score")
+  feedback          String?          @db.Text
+  status            SubmissionStatus @default(IN_PROGRESS)
+  submittedAt       DateTime?        @map("submitted_at")
+  gradedAt          DateTime?        @map("graded_at")
+  gradedBy          String?          @map("graded_by")
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+
+  @@map("submissions")
+  @@unique([assignmentId, studentId])
+  @@index([assignmentId])
+  @@index([studentId])
+  @@index([status])
+}
+
+model Announcement {
+  id         String   @id @default(uuid())
+  classId    String   @map("class_id")
+  class      Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacherId  String   @map("teacher_id")
+  teacher    User     @relation("TeacherAnnouncements", fields: [teacherId], references: [id], onDelete: Cascade)
+  title      String
+  content    String   @db.Text
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("announcements")
+  @@index([classId])
+  @@index([teacherId])
+}
