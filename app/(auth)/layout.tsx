@@ -11,8 +11,8 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">
       {/* Left: illustration */}
-      <div className="relative hidden overflow-hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-primary to-slate-900 text-white">
-        <div className="absolute inset-0 ai-gradient-bg opacity-40" />
+      <div className="relative hidden overflow-hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-slate-800 via-slate-900 to-black text-white">
+        <div className="absolute inset-0 ai-gradient-bg opacity-20" />
         <div className="relative flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
             <BookOpenCheck className="h-5 w-5" />

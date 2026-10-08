@@ -198,14 +198,93 @@ export async function loginUser(raw: z.infer<typeof loginSchema>): Promise<Actio
   const { email, password } = parsed.data;
 
   try {
-    const localUser = await prisma.user.findUnique({ where: { email } });
-    if (!localUser) return { success: false, error: "Email hoặc mật khẩu không đúng." };
+    let localUser;
 
     if (USE_SUPABASE_AUTH) {
       const sb = await createClient();
-      const { error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) return { success: false, error: "Email hoặc mật khẩu không đúng." };
+      let { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+      if (error || !data.user) {
+        const legacyUser = await prisma.user.findUnique({ where: { email } });
+        if (
+          !legacyUser?.passwordHash ||
+          !(await bcrypt.compare(password, legacyUser.passwordHash))
+        ) {
+          return { success: false, error: "Email hoặc mật khẩu không đúng." };
+        }
+
+        const { data: created, error: createError } =
+          await getServiceRoleClient().auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+            user_metadata: { name: legacyUser.name, role: legacyUser.role },
+          });
+        if (createError || !created.user) {
+          return {
+            success: false,
+            error:
+              createError?.message ||
+              "Không thể liên kết tài khoản hiện có với Supabase Auth.",
+          };
+        }
+
+        await prisma.user.update({
+          where: { id: legacyUser.id },
+          data: { supabaseUserId: created.user.id },
+        });
+        ({ data, error } = await sb.auth.signInWithPassword({ email, password }));
+      }
+
+      if (error || !data.user) {
+        return {
+          success: false,
+          error: "Không thể tạo phiên đăng nhập Supabase. Hãy thử lại.",
+        };
+      }
+
+      localUser = await prisma.user.findUnique({
+        where: { supabaseUserId: data.user.id },
+      });
+      if (!localUser && data.user.email) {
+        localUser = await prisma.user.findUnique({
+          where: { email: data.user.email },
+        });
+        if (localUser && localUser.supabaseUserId !== data.user.id) {
+          localUser = await prisma.user.update({
+            where: { id: localUser.id },
+            data: { supabaseUserId: data.user.id },
+          });
+        }
+      }
+
+      if (!localUser) {
+        const role = data.user.user_metadata?.role;
+        if (role !== "TEACHER" && role !== "STUDENT") {
+          return {
+            success: false,
+            error:
+              "Đăng nhập Supabase thành công nhưng tài khoản chưa được liên kết với hồ sơ LMS. Hãy đăng ký qua ứng dụng hoặc nhờ quản trị viên thiết lập vai trò.",
+          };
+        }
+        const profileEmail = data.user.email ?? email;
+        const metadataName = data.user.user_metadata?.name;
+        const name =
+          typeof metadataName === "string" && metadataName.trim()
+            ? metadataName.trim()
+            : profileEmail.split("@")[0];
+        localUser = await syncLocalProfile({
+          supabaseUserId: data.user.id,
+          email: profileEmail,
+          name,
+          role,
+        });
+      }
     } else {
+      localUser = await prisma.user.findUnique({ where: { email } });
+      if (!localUser) {
+        return { success: false, error: "Email hoặc mật khẩu không đúng." };
+      }
       if (!localUser.passwordHash) {
         return { success: false, error: "Tài khoản này không hỗ trợ đăng nhập mật khẩu" };
       }

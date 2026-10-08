@@ -35,11 +35,7 @@ import { loginUser, registerUser } from "@/lib/server-actions/auth";
 const formSchema = z.object({
   name: z.string().min(2, "Tên tối thiểu 2 ký tự").optional(),
   email: z.string().email("Email không hợp lệ"),
-  password: z
-    .string()
-    .min(8, "Mật khẩu tối thiểu 8 ký tự")
-    .regex(/[A-Za-z]/, "Mật khẩu phải chứa chữ")
-    .regex(/[0-9]/, "Mật khẩu phải chứa ít nhất 1 chữ số"),
+  password: z.string().min(1, "Vui lòng nhập mật khẩu"),
   role: z.enum(["TEACHER", "STUDENT"]),
 });
 
