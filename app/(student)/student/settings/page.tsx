@@ -119,21 +119,21 @@ export default async function StudentSettingsPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-2 text-sm">
-            <div className="rounded-lg border bg-slate-50 p-4">
+            <div className="rounded-lg border bg-muted p-4">
               <div className="text-xs uppercase text-muted-foreground mb-1">User ID</div>
-              <div className="font-mono text-slate-800 break-all">{user.id}</div>
+              <div className="font-mono break-all">{user.id}</div>
             </div>
-            <div className="rounded-lg border bg-slate-50 p-4">
+            <div className="rounded-lg border bg-muted p-4">
               <div className="text-xs uppercase text-muted-foreground mb-1">Supabase User ID</div>
-              <div className="font-mono text-slate-800 break-all">
+              <div className="font-mono break-all">
                 {user.supabaseUserId || "— (đang dùng Prisma local)"}
               </div>
             </div>
-            <div className="rounded-lg border bg-slate-50 p-4">
+            <div className="rounded-lg border bg-muted p-4">
               <div className="text-xs uppercase text-muted-foreground mb-1">Ngày tạo</div>
               <div className="font-medium">{user.createdAt.toLocaleString("vi-VN")}</div>
             </div>
-            <div className="rounded-lg border bg-slate-50 p-4">
+            <div className="rounded-lg border bg-muted p-4">
               <div className="text-xs uppercase text-muted-foreground mb-1">Vai trò</div>
               <div className="font-medium">{user.role}</div>
             </div>

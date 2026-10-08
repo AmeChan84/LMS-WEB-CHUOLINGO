@@ -228,7 +228,7 @@ export function AssignmentPlayerClient({
                       !active && answered &&
                         "bg-emerald-50 border-emerald-300 text-emerald-700",
                       !active && !answered &&
-                        "bg-white border-border text-muted-foreground hover:border-indigo-300 hover:text-indigo-600"
+                        "bg-card border-border text-muted-foreground hover:border-indigo-300 hover:text-indigo-400"
                     )}
                     title={QUESTION_TYPE_LABELS[qq.type]}
                   >
