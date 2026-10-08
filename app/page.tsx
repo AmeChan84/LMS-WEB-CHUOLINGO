@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   FileUp,
 } from "lucide-react";
+import { Progress as ProgressBar } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -80,7 +81,7 @@ export default function LandingPage() {
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
               Giáo viên quản lý lớp học, tải lên bài giảng Zoom và để AI tự động
-              tạo hàng trăm bài tập tương tác đa dạng dạng trong vài giây. Học
+              tạo hàng trăm bài tập tương tác đa dạng trong vài giây. Học
               sinh làm bài, nhận phản hồi tức thì và theo dõi tiến độ cá nhân.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -111,7 +112,14 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="relative flex items-center justify-center">
-            <div className="absolute -inset-20 bg-[radial-gradient(ellipse_at_center,theme(colors.ai.DEFAULT_)/0.15,transparent_60%)]" />
+            <div
+              aria-hidden="true"
+              className="absolute -inset-20"
+              style={{
+                background:
+                  "radial-gradient(ellipse at center, hsl(var(--ai) / 0.15), transparent 60%)",
+              }}
+            />
             <div className="relative w-full max-w-xl">
               <div className="rounded-2xl border border-border/60 bg-card card-shadow p-2">
                 <div className="flex items-center gap-2 border-b border-border/60 px-4 py-3">
@@ -450,10 +458,9 @@ export default function LandingPage() {
 }
 
 function ProgressWrapper({ percent }: { percent: number }) {
-  const Progress = require("@/components/ui/progress").Progress as typeof import("@/components/ui/progress").Progress;
   return (
     <div>
-      <Progress value={percent} />
+      <ProgressBar value={percent} />
       <div className="mt-2 flex justify-between text-xs text-muted-foreground">
         <span>Tiến độ</span>
         <span className="font-medium">{percent}%</span>
